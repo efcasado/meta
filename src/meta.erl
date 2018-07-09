@@ -469,9 +469,22 @@ export_function(Name, Arity, Module)
   when is_atom(Module) ->
     export_function(Name, Arity, load_forms(Module));
 export_function(Name, Arity, Module) ->
-    [FileAttr, ModuleAttr| Forms] = Module,
-    ExportAttr = {attribute, 0, export, [{Name, Arity}]},
-    [FileAttr, ModuleAttr, ExportAttr| Forms].
+    case is_function_exported(Name, Arity, Module) of
+        true  -> Module;
+        false ->
+            case has_attr(export, Module) of
+                true ->
+                    forms:map(fun({attribute, L, export, Es}) ->
+                                 {attribute, L, export, Es ++ [{Name, Arity}]};
+                                 (Form) -> Form
+                              end,
+                              Module);
+                false ->
+                    [FileAttr, ModuleAttr| Forms] = Module,
+                    ExportAttr = {attribute, 0, export, [{Name, Arity}]},
+                    [FileAttr, ModuleAttr, ExportAttr| Forms]
+            end
+    end.
 
 %%-------------------------------------------------------------------------
 %% @doc
