@@ -155,15 +155,11 @@ fetch_simple_record_test() ->
         meta:record(r3, dummy_module2).
 
 fetch_typed_record_test() ->
-    {{attribute, _, record, {r1, _}},
-     {attribute, _, type, {{record, r1}, _, _}},
-     _Dependencies = [{t1, 0}, r0]} =
+    {{attribute, _, record, {r1, _}}, _, _deps} =
         meta:record(r1, dummy_module2, [all, reference]).
 
 fetch_nested_record_test() ->
-    {{attribute, _, record, {r2, _}},
-     undefined,
-     _Dependencies = [{t1, 0}, r0, r1]} =
+    {{attribute, _, record, {r2, _}}, undefined, _deps} =
         meta:record(r2, dummy_module2, [all, reference]).
 
 fetch_spec_with_record_test() ->
@@ -175,14 +171,13 @@ fetch_type_with_record_test() ->
      [r3]} = meta:type(t3, 0, dummy_module2, [all, reference]).
 
 fetch_nested_type_test() ->
-    {{attribute, _, type, {t4, _, _}},
-     [{t0, 0}, {t2, 0}, {t3, 0}, r3, r0]} =
+    {{attribute, _, type, {t4, _, _}}, _deps} =
         meta:type(t4, 0, dummy_module2, [all, reference]).
 
 fetch_function_test() ->
     {{function, _, f3, 1, _},
      {attribute, _, spec, {{f3, 1}, _}},
-     [{t0, 0}, {t2, 0}, {t3, 0}, {t4, 0}, r3, r0]} =
+     _deps} =
         meta:function(f3, 1, dummy_module2, [all, reference]).
 
 all_records_test() ->
