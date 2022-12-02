@@ -154,17 +154,63 @@ fetch_simple_record_test() ->
     {{attribute, _, record, {r3, _}}, undefined, _Dependencies = []} =
         meta:record(r3, dummy_module2).
 
+%% OTP 21 or higher
+-ifdef(OTP_RELEASE).
 fetch_typed_record_test() ->
-    {{attribute, _, record, {r1, _}},
-     {attribute, _, type, {{record, r1}, _, _}},
-     _Dependencies = [{t1, 0}, r0]} =
+    {{attribute, _, record,
+      {r1, [{typed_record_field, {record_field, _, {atom, _, f11}},
+             {user_type, _, t1, []}},
+            {record_field, _, {atom, _, f12}, {record, _, r0, []}},
+            {typed_record_field, {record_field, _, {atom, _, f13}},
+             {type, _, integer, []}}]}},
+     undefined,
+     [r0]} =
         meta:record(r1, dummy_module2, [all, reference]).
+-else.
+%% OTP 20 or lower
+fetch_typed_record_test() ->
+    case erlang:system_info(otp_release) < "19" of
+        true ->
+            {{attribute, _, record, {r1, _}},
+             {attribute, _, type, {{record, r1}, _, _}},
+             [{t1, 0}, r0]} =
+                meta:record(r1, dummy_module2, [all, reference]);
+        false ->
+            {{attribute, _, record,
+              {r1, [{typed_record_field, {record_field, _, {atom, _, f11}},
+                     {user_type, _, t1, []}},
+                    {record_field, _, {atom, _, f12}, {record, _, r0, []}},
+                    {typed_record_field, {record_field, _, {atom, _, f13}},
+                     {type, _, integer, []}}]}},
+             undefined,
+             [r0]} =
+                meta:record(r1, dummy_module2, [all, reference])
+    end.
+-endif.
 
+%% OTP 21 or higher
+-ifdef(OTP_RELEASE).
 fetch_nested_record_test() ->
     {{attribute, _, record, {r2, _}},
      undefined,
-     _Dependencies = [{t1, 0}, r0, r1]} =
+     [r0,r1]} =
         meta:record(r2, dummy_module2, [all, reference]).
+-else.
+%% OTP 20 or lower
+fetch_nested_record_test() ->
+    case erlang:system_info(otp_release) < "19" of
+        true ->
+            {{attribute, _, record, {r2, _}},
+             undefined,
+             [{t1, 0}, r0, r1]} =
+                meta:record(r2, dummy_module2, [all, reference]);
+        false ->
+            {{attribute, _, record, {r2, _}},
+             undefined,
+             [r0,r1]} =
+                meta:record(r2, dummy_module2, [all, reference])
+    end.
+-endif.
 
 fetch_spec_with_record_test() ->
     {{attribute, _, spec, {{f2, 1}, _}},
@@ -174,16 +220,50 @@ fetch_type_with_record_test() ->
     {{attribute, _, type, {t3, _, _}},
      [r3]} = meta:type(t3, 0, dummy_module2, [all, reference]).
 
+%% OTP 21 or higher
+-ifdef(OTP_RELEASE).
 fetch_nested_type_test() ->
-    {{attribute, _, type, {t4, _, _}},
-     [{t0, 0}, {t2, 0}, {t3, 0}, r3, r0]} =
+    {{attribute, _, type, {t4, {type, _, union, _}, []}},
+     []} =
         meta:type(t4, 0, dummy_module2, [all, reference]).
+-else.
+%% OTP 20 or lower
+fetch_nested_type_test() ->
+    case erlang:system_info(otp_release) < "19" of
+        true ->
+            {{attribute, _, type, {t4, _, _}},
+             [{t0, 0}, {t2, 0}, {t3, 0}, r3, r0]} =
+                meta:type(t4, 0, dummy_module2, [all, reference]);
+        false ->
+            {{attribute, _, type, {t4, {type, _, union, _}, []}},
+             []} =
+                meta:type(t4, 0, dummy_module2, [all, reference])
+    end.
+-endif.
 
+%% OTP 21 or higher
+-ifdef(OTP_RELEASE).
 fetch_function_test() ->
     {{function, _, f3, 1, _},
      {attribute, _, spec, {{f3, 1}, _}},
-     [{t0, 0}, {t2, 0}, {t3, 0}, {t4, 0}, r3, r0]} =
+     []} =
         meta:function(f3, 1, dummy_module2, [all, reference]).
+-else.
+%% OTP 20 or lower
+fetch_function_test() ->
+    case erlang:system_info(otp_release) < "19" of
+        true ->
+            {{function, _, f3, 1, _},
+             {attribute, _, spec, {{f3, 1}, _}},
+             [{t0, 0}, {t2, 0}, {t3, 0}, {t4, 0}, r3, r0]} =
+                meta:function(f3, 1, dummy_module2, [all, reference]);
+        false ->
+            {{function, _, f3, 1, _},
+             {attribute, _, spec, {{f3, 1}, _}},
+             []} =
+                meta:function(f3, 1, dummy_module2, [all, reference])
+    end.
+-endif.
 
 all_records_test() ->
     true = lists:all(fun(R) ->
